@@ -4,3 +4,4 @@ logs
 /brick
 
 gen.py
+.env
