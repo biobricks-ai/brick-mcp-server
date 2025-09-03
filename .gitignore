@@ -8,3 +8,5 @@ gen.py
 __pycache__
 .venv
 .ruff_cache
+/cache
+/.chainlit
