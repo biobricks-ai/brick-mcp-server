@@ -1,2 +1,29 @@
 schema: '2.0'
-stages: {}
+stages:
+  list:
+    cmd: stages/01_list.sh
+    deps:
+    - path: stages/01_list.sh
+      hash: md5
+      md5: 70bfc615ae982d143598236d8c7c0e71
+      size: 849
+      isexec: true
+    outs:
+    - path: list
+      hash: md5
+      md5: 6ced551b3370e843090b76c7cea698cc.dir
+      size: 1015
+      nfiles: 1
+  install:
+    cmd: stages/02_install.sh
+    deps:
+    - path: list
+      hash: md5
+      md5: 6ced551b3370e843090b76c7cea698cc.dir
+      size: 1015
+      nfiles: 1
+    - path: stages/02_install.sh
+      hash: md5
+      md5: a6fbafcfc7a591176f7368d6b8fe9067
+      size: 791
+      isexec: true

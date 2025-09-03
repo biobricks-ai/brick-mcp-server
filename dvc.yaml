@@ -20,8 +20,8 @@ stages:
     deps:
       - stages/02_install.sh
       - list
-  build: 
-    cmd: stages/03_extract.py
+  extract: 
+    cmd: uv run stages/03_extract.py
     deps:
       - stages/03_extract.py
     outs:

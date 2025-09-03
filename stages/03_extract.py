@@ -14,10 +14,11 @@ MCP_CATALOG = {}
 
 
 def extract_parquet(path):
-    pf = pq.ParquetFile(path)
-    batch = next(pf.iter_batches(10))
+    pd = pq.ParquetDataset(path)
+    fragment = pd.fragments[0]
+    batch = next(fragment.to_batches(batch_size=10))
     mcp_sample = batch.to_pylist()
-    mcp_schema = {field.name: str(field.logical_type) for field in pf.schema}
+    mcp_schema = {field.name: str(field.type) for field in fragment.physical_schema}
 
     return mcp_schema, mcp_sample
 
@@ -74,34 +75,50 @@ def extract_hdt(path):
 
 
 def extract_context(brick: str):
-    brick_assets = bb.assets(brick)
-    brick_assets_dict = vars(brick_assets)
-
-    for asset, path in brick_assets_dict.items():
+    brick_assets = vars(bb.assets(brick))
+    for asset, path in tqdm(
+        brick_assets.items(),
+        desc=f"Processing assets for {brick}",
+        leave=False,
+        position=1,
+    ):
         if asset.endswith("parquet"):
+            fmt = "parquet"
             schema, sample = extract_parquet(path)
-            MCP_CATALOG[brick][asset] = (schema, sample)
-
         elif asset.endswith("sqlite"):
+            fmt = "sqlite"
             schema, sample = extract_sqlite(path)
-            MCP_CATALOG[brick][asset] = (schema, sample)
-
         elif asset.endswith("hdt"):
+            fmt = "hdt"
+            schema = None
             sample = extract_hdt(path)
-            MCP_CATALOG[brick][asset] = sample
+        else:
+            raise ValueError(f"Unsupported file type: {path}")
+
+        MCP_CATALOG[brick][asset] = {
+            "brick_name": brick,
+            "asset": asset,
+            "format": fmt,
+            "schema": schema,
+            "preview_rows": sample,
+        }
 
 
 def read_list():
     os.makedirs("cache", exist_ok=True)
-    with open("list/bricks.txt", "r") as f:
-        for line in tqdm(f, desc="Processing bricks"):
-            brick = line.strip()
-
-            MCP_CATALOG[brick] = {}
+    f = open("list/bricks.txt", "r")
+    lines = f.readlines()
+    for line in tqdm(lines, desc="Processing bricks", position=0):
+        brick = line.strip()
+        MCP_CATALOG[brick] = {}
+        try:
             extract_context(brick)
-
-            with open(f"cache/{brick}.json", "w") as f:
-                json.dump(MCP_CATALOG[brick], f, indent=2)
+        except Exception as e:
+            print(f"Failed to extract {brick}: {e}")
+            continue
+        if len(MCP_CATALOG[brick]):
+            with open(f"cache/{brick}.json", "w") as f_out:
+                json.dump(MCP_CATALOG[brick], f_out, indent=2, default=str)
 
 
 def main():
