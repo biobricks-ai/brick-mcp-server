@@ -1,3 +1,0 @@
-[submodule "vendor/biobricks-script-lib"]
-	path = vendor/biobricks-script-lib
-	url = https://github.com/biobricks-ai/biobricks-script-lib.git
