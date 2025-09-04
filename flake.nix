@@ -3,15 +3,18 @@
 		# Required for Nix 2.27.0+ when using git submodules
 		self.submodules = true;
 
-		biobricks-script-lib.url = "path:./vendor/biobricks-script-lib";
-		qendpoint-manage.url = "path:./vendor/biobricks-script-lib/component/qendpoint-manage";
-
 		nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
 		flake-utils.url = "github:numtide/flake-utils";
 		dev-shell.url = "github:biobricks-ai/dev-shell";
+
+		biobricks-script-lib = {
+			url = "github:biobricks-ai/biobricks-script-lib";
+			inputs.nixpkgs.follows = "nixpkgs";
+			inputs.flake-utils.follows = "flake-utils";
+		};
 	};
 
-	outputs = { self, nixpkgs, flake-utils, biobricks-script-lib, dev-shell, qendpoint-manage }:
+	outputs = { self, nixpkgs, flake-utils, biobricks-script-lib, dev-shell }:
 		flake-utils.lib.eachDefaultSystem (system:
 			with import nixpkgs { inherit system; }; {
 				devShells.default = dev-shell.devShells.${system}.default.overrideAttrs
@@ -21,7 +24,7 @@
 
 					shellHook = ''
 						# Activate biobricks-script-lib environment
-						eval $(${biobricks-script-lib.packages.${system}.activateScript})
+						${biobricks-script-lib.devShells.${system}.default.shellHook or ""}
 
             source .venv/bin/activate
 					'';
