@@ -3,20 +3,17 @@
 import biobricks as bb
 import pyarrow.parquet as pq
 import sqlite3
-from rdflib_hdt import HDTStore
-from rdflib import Graph
 from tqdm import tqdm
 import json
 import os
 
-
-MCP_CATALOG = {}
+BRICK_INFO = {}
 
 
 def extract_parquet(path):
     pd = pq.ParquetDataset(path)
     fragment = pd.fragments[0]
-    batch = next(fragment.to_batches(batch_size=10))
+    batch = next(fragment.to_batches(batch_size=5))
     mcp_sample = batch.to_pylist()
     mcp_schema = {field.name: str(field.type) for field in fragment.physical_schema}
 
@@ -31,50 +28,83 @@ def extract_sqlite(path):
     tables = cursor.fetchall()
 
     mcp_sample = {}
+    mcp_schema = {}
+
     for (table_name,) in tables:
-        cursor.execute(f"SELECT * FROM `{table_name}` LIMIT 10;")
+        cursor.execute(f"SELECT * FROM `{table_name}` LIMIT 5;")
         rows = cursor.fetchall()
         col_names = [desc[0] for desc in cursor.description]
         # Convert each row to a dict
         dict_rows = [dict(zip(col_names, row)) for row in rows]
         mcp_sample[table_name] = dict_rows
 
-    cursor.execute(f"PRAGMA table_info(`{table_name}`);")
-    mcp_schema = {row[1]: row[2] for row in cursor.fetchall()}
+        # Get schema for this table
+        cursor.execute(f"PRAGMA table_info(`{table_name}`);")
+        table_schema = {row[1]: row[2] for row in cursor.fetchall()}
+        mcp_schema[table_name] = table_schema
 
     conn.close()
 
     return mcp_schema, mcp_sample
 
 
-def extract_hdt(path):
-    # Load the HDT file using rdflib_hdt
-    store = HDTStore(path)
-    g = Graph(store=store)
+# def extract_hdt(path):
+#     # Load the HDT file using rdflib_hdt
+#     optimize_sparql()
 
-    # Extract all unique (subject, predicate, object) triples
-    triples_set = set()
-    for s, p, o in g.triples((None, None, None)):
-        triples_set.add((str(s), str(p), str(o)))
+#     store = HDTStore(path)
+#     g = Graph(store)
 
-    # Unpack into separate sets for subjects, predicates, objects
-    subjects = set()
-    predicates = set()
-    objects = set()
-    for s, p, o in triples_set:
-        subjects.add(s)
-        predicates.add(p)
-        objects.add(o)
+#     # Get unique rdf:type objects (entity types) using SPARQL
+#     q_types = g.query("""
+#     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+#     SELECT DISTINCT ?type WHERE {
+#         ?s rdf:type ?type .
+#     }
+#     """)
+#     types = set()
+#     for row in q_types:
+#         types.add(str(row.type))
 
-    mcp_sample = {
-        "subjects": list(subjects),
-        "predicates": list(predicates),
-        "objects": list(objects),
-    }
-    return mcp_sample
+#     q_labels = g.query("""
+#     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+#     SELECT DISTINCT ?label WHERE {
+#         ?s rdfs:label ?label .
+#     }
+#     """)
+#     labels = set()
+#     for row in q_labels:
+#         labels.add(str(row.label))
+
+#     # Get all unique predicate namespaces (ontologies/schemas)
+#     q_preds = g.query("""
+#     SELECT DISTINCT ?pred WHERE {
+#         ?s ?p ?o .
+#     }
+#     """)
+#     preds = set()
+#     for row in q_preds:
+#         preds.add(row.pred)
+
+#     mcp_sample = {
+#         "total_triples": len(store),
+#         "num_subjects": store.nb_subjects,
+#         "num_predicates": store.nb_predicates,
+#         "num_objects": store.nb_objects,
+#         "num_shared_subject_object": store.nb_shared,
+#         "entity_types": types,
+#         "labels": labels,
+#         "ontologies": preds,
+#     }
+
+#     store.close()
+
+#     return mcp_sample
 
 
 def extract_context(brick: str):
+    global BRICK_INFO
+
     brick_assets = vars(bb.assets(brick))
     for asset, path in tqdm(
         brick_assets.items(),
@@ -89,13 +119,11 @@ def extract_context(brick: str):
             fmt = "sqlite"
             schema, sample = extract_sqlite(path)
         elif asset.endswith("hdt"):
-            fmt = "hdt"
-            schema = None
-            sample = extract_hdt(path)
+            continue
         else:
             raise ValueError(f"Unsupported file type: {path}")
 
-        MCP_CATALOG[brick][asset] = {
+        BRICK_INFO[asset] = {
             "brick_name": brick,
             "asset": asset,
             "format": fmt,
@@ -105,20 +133,24 @@ def extract_context(brick: str):
 
 
 def read_list():
-    os.makedirs("cache", exist_ok=True)
+    global BRICK_INFO
+
+    os.makedirs("tmp/other", exist_ok=True)
     f = open("list/bricks.txt", "r")
     lines = f.readlines()
     for line in tqdm(lines, desc="Processing bricks", position=0):
+        BRICK_INFO = {}
+
         brick = line.strip()
-        MCP_CATALOG[brick] = {}
         try:
             extract_context(brick)
         except Exception as e:
             print(f"Failed to extract {brick}: {e}")
             continue
-        if len(MCP_CATALOG[brick]):
-            with open(f"cache/{brick}.json", "w") as f_out:
-                json.dump(MCP_CATALOG[brick], f_out, indent=2, default=str)
+
+        if len(BRICK_INFO):
+            with open(f"tmp/other/{brick}.json", "w") as f_out:
+                json.dump(BRICK_INFO, f_out, indent=2, default=str)
 
 
 def main():
