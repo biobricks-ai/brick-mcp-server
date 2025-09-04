@@ -11,7 +11,7 @@ stages:
     outs:
     - path: list
       hash: md5
-      md5: 6ced551b3370e843090b76c7cea698cc.dir
+      md5: 978a497c50d7c7f01501f7ae012c15ef.dir
       size: 1015
       nfiles: 1
   install:
@@ -19,7 +19,7 @@ stages:
     deps:
     - path: list
       hash: md5
-      md5: 6ced551b3370e843090b76c7cea698cc.dir
+      md5: 978a497c50d7c7f01501f7ae012c15ef.dir
       size: 1015
       nfiles: 1
     - path: stages/02_install.sh
@@ -27,3 +27,41 @@ stages:
       md5: a6fbafcfc7a591176f7368d6b8fe9067
       size: 791
       isexec: true
+  extract:
+    cmd: uv run stages/03_extract.py
+    deps:
+    - path: list
+      hash: md5
+      md5: 978a497c50d7c7f01501f7ae012c15ef.dir
+      size: 1015
+      nfiles: 1
+    - path: stages/03_extract.py
+      hash: md5
+      md5: 20d84ad5d3724e94e53079cd3dc5ecaf
+      size: 4176
+      isexec: true
+    outs:
+    - path: tmp/other
+      hash: md5
+      md5: 6e4ad25485e950cea7aefe8841c836ba.dir
+      size: 22641600
+      nfiles: 58
+  extract-hdt:
+    cmd: stages/04_extract_hdt.sh
+    deps:
+    - path: list
+      hash: md5
+      md5: 978a497c50d7c7f01501f7ae012c15ef.dir
+      size: 1015
+      nfiles: 1
+    - path: stages/04_extract_hdt.sh
+      hash: md5
+      md5: b26cfc55989f8b70bd46a17c37a2b3f4
+      size: 99
+      isexec: true
+    outs:
+    - path: tmp/hdt
+      hash: md5
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0

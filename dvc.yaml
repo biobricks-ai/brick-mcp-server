@@ -24,5 +24,20 @@ stages:
     cmd: uv run stages/03_extract.py
     deps:
       - stages/03_extract.py
+      - list
     outs:
-      - cache
+      - tmp/other
+  extract-hdt:
+    cmd: stages/04_extract_hdt.sh
+    deps:
+      - stages/04_extract_hdt.sh
+      - list
+    outs:
+      - tmp/hdt
+  # merge-metadata:
+  #   cmd: cp -r tmp/hdt/* cache/ && cp -r tmp/other/* cache/ && rm -rf tmp
+  #   deps:
+  #     - tmp/hdt
+  #     - tmp/other
+  #   outs:
+  #     - cache/
