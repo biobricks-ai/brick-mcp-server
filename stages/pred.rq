@@ -1,0 +1,4 @@
+SELECT DISTINCT ?pred WHERE {
+    ?s ?pred ?o .
+}
+LIMIT 20
