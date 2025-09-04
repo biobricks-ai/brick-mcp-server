@@ -123,13 +123,15 @@ def extract_context(brick: str):
         else:
             raise ValueError(f"Unsupported file type: {path}")
 
-        BRICK_INFO[asset] = {
-            "brick_name": brick,
-            "asset": asset,
-            "format": fmt,
-            "schema": schema,
-            "preview_rows": sample,
-        }
+        BRICK_INFO.append(
+            {
+                "brick_name": brick,
+                "asset": asset,
+                "format": fmt,
+                "schema": schema,
+                "preview_rows": sample,
+            }
+        )
 
 
 def read_list():
@@ -139,7 +141,7 @@ def read_list():
     f = open("list/bricks.txt", "r")
     lines = f.readlines()
     for line in tqdm(lines, desc="Processing bricks", position=0):
-        BRICK_INFO = {}
+        BRICK_INFO = []
 
         brick = line.strip()
         try:
@@ -150,7 +152,7 @@ def read_list():
 
         if len(BRICK_INFO):
             with open(f"tmp/other/{brick}.json", "w") as f_out:
-                json.dump(BRICK_INFO, f_out, indent=2, default=str)
+                json.dump(BRICK_INFO, f_out, separators=(",", ":"), default=str)
 
 
 def main():
