@@ -15,7 +15,6 @@ OWNER="biobricks-ai"
 repos=$(gh repo list "$OWNER" --visibility=public --limit "1000" --json name,owner --jq '.[] | "\(.owner.login)/\(.name)"')
 
 # For each repo, check if root-level dvc.lock exists using the contents API
-export TMPFILE
 # shellcheck disable=SC2016
 echo "$repos" | parallel --will-cite --bar '
     repo="{}"
