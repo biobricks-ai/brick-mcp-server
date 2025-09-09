@@ -106,12 +106,16 @@ def extract_context(brick: str):
     global BRICK_INFO
 
     brick_assets = vars(bb.assets(brick))
-    for asset, path in tqdm(
+
+    pbar = tqdm(
         brick_assets.items(),
-        desc=f"Processing assets for {brick}",
         leave=False,
         position=1,
-    ):
+    )
+
+    for asset, path in pbar:
+        pbar.set_description(f"Processing {asset}")
+
         if asset.endswith("parquet"):
             fmt = "parquet"
             schema, sample = extract_parquet(path)
@@ -137,13 +141,16 @@ def extract_context(brick: str):
 def read_list():
     global BRICK_INFO
 
-    os.makedirs("tmp/other", exist_ok=True)
-    f = open("list/bricks.txt", "r")
-    lines = f.readlines()
-    for line in tqdm(lines, desc="Processing bricks", position=0):
+    os.makedirs("cache", exist_ok=True)
+
+    with open("list/bricks.txt", "r") as f:
+        bricks = [line.strip() for line in f.readlines()]
+    pbar = tqdm(bricks, position=0)
+
+    for brick in pbar:
+        pbar.set_description(f"Processing {brick}")
         BRICK_INFO = []
 
-        brick = line.strip()
         try:
             extract_context(brick)
         except Exception as e:
@@ -151,7 +158,7 @@ def read_list():
             continue
 
         if len(BRICK_INFO):
-            with open(f"tmp/other/{brick}.json", "w") as f_out:
+            with open(f"cache/{brick}.json", "w") as f_out:
                 json.dump(BRICK_INFO, f_out, separators=(",", ":"), default=str)
 
 
