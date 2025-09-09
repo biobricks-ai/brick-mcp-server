@@ -20,20 +20,13 @@ stages:
     deps:
       - stages/02_install.sh
       - list
-    outs:
-      - install.txt
-  extract: 
-    cmd: uv run stages/03_extract.py
+  resolve: 
+    cmd: stages/03_resolve.sh
     deps:
-      - stages/03_extract.py
-      - list
-      - install.txt
+      - stages/03_resolve.sh
     outs:
-      - cache
-  embed:
-    cmd: uv run stages/04_embed.py
+      - mcp
+  ragify:
+    cmd: uv run stages/04_ragify.py
     deps:
-      - cache/
-      - list/
-    outs:
-      - metadata/
+      - stages/04_ragify.py

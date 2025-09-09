@@ -5,13 +5,13 @@ stages:
     deps:
     - path: stages/01_list.sh
       hash: md5
-      md5: 3d7cdb6f98b6396bf9045f7db71765a9
-      size: 861
+      md5: d1dc801fe9940ff94a873bf3ba53179a
+      size: 846
       isexec: true
     outs:
     - path: list
       hash: md5
-      md5: a394412bb0f17e3594ea00d1c3e2b603.dir
+      md5: 2c528f9c42d9d144af9c91b17b60d3b4.dir
       size: 1015
       nfiles: 1
   install:
@@ -19,42 +19,37 @@ stages:
     deps:
     - path: list
       hash: md5
-      md5: a394412bb0f17e3594ea00d1c3e2b603.dir
+      md5: 2c528f9c42d9d144af9c91b17b60d3b4.dir
       size: 1015
       nfiles: 1
     - path: stages/02_install.sh
       hash: md5
-      md5: cdc8c1541fe40886e589d870ab84d54a
-      size: 814
+      md5: 9a83837d4edeb52382c8eca6bdc8ff04
+      size: 803
       isexec: true
-    outs:
-    - path: install.txt
-      hash: md5
-      md5: 461044c8acd86552126fa8d68b85ad80
-      size: 56195
   extract:
     cmd: uv run stages/03_extract.py
     deps:
     - path: install.txt
       hash: md5
-      md5: 461044c8acd86552126fa8d68b85ad80
-      size: 56195
+      md5: b8e354ba51c8864f1379a2b26054db44
+      size: 55996
     - path: list
       hash: md5
-      md5: a394412bb0f17e3594ea00d1c3e2b603.dir
+      md5: 5bf3cceed5b5832e0843963c958e0614.dir
       size: 1015
       nfiles: 1
     - path: stages/03_extract.py
       hash: md5
-      md5: 26010151f32a75a9097577df2679a259
-      size: 4232
+      md5: 6c29ffa20306adacb503a784c30e94c3
+      size: 4304
       isexec: true
     outs:
-    - path: tmp/other
+    - path: cache
       hash: md5
-      md5: 93e45bf812b41e886ae4fae4cdf7ceb9.dir
-      size: 7871021
-      nfiles: 58
+      md5: 189c25b563d19ef62a9ea88a1ce5da9d.dir
+      size: 7878160
+      nfiles: 59
   extract-hdt:
     cmd: stages/04_extract_hdt.sh
     deps:
@@ -74,3 +69,11 @@ stages:
       md5: d751713988987e9331980363e24189ce.dir
       size: 0
       nfiles: 0
+  resolve:
+    cmd: stages/03_resolve.sh
+    deps:
+    - path: stages/03_resolve.sh
+      hash: md5
+      md5: 6cb136fe8b6b872469d2c37a9b3648e1
+      size: 804
+      isexec: true
