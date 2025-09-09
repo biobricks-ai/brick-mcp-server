@@ -23,6 +23,6 @@ fi
 # Use GNU parallel to install bricks with a progress bar
 # shellcheck disable=SC2016
 grep -v '^[[:space:]]*$' "$LIST_FILE" | grep -v '^[[:space:]]*#' | \
-    parallel --will-cite --bar '
-        biobricks install "{}" > /dev/null 2>> install.txt
+    parallel --bar --will-cite '
+        biobricks install "{}" > /dev/null 2>&1
     '
