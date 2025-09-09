@@ -11,3 +11,5 @@ __pycache__
 /cache
 /.chainlit
 /tmp
+install.txt
+/mcp
