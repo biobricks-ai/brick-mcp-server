@@ -5,13 +5,13 @@ stages:
     deps:
     - path: stages/01_list.sh
       hash: md5
-      md5: d1dc801fe9940ff94a873bf3ba53179a
-      size: 846
+      md5: 5e67bf8eb69b6020ed0e475ef5b92ef1
+      size: 850
       isexec: true
     outs:
     - path: list
       hash: md5
-      md5: 2c528f9c42d9d144af9c91b17b60d3b4.dir
+      md5: 23c084264fce5ff1828623f0b4b72bf4.dir
       size: 1015
       nfiles: 1
   install:
@@ -19,13 +19,13 @@ stages:
     deps:
     - path: list
       hash: md5
-      md5: 2c528f9c42d9d144af9c91b17b60d3b4.dir
+      md5: 23c084264fce5ff1828623f0b4b72bf4.dir
       size: 1015
       nfiles: 1
     - path: stages/02_install.sh
       hash: md5
-      md5: 9a83837d4edeb52382c8eca6bdc8ff04
-      size: 803
+      md5: 033ce23a3ec63c710720fffde35d83aa
+      size: 807
       isexec: true
   extract:
     cmd: uv run stages/03_extract.py
@@ -74,6 +74,14 @@ stages:
     deps:
     - path: stages/03_resolve.sh
       hash: md5
-      md5: 6cb136fe8b6b872469d2c37a9b3648e1
-      size: 804
+      md5: 5e7f7ba0e70b1c64295442308d89beed
+      size: 757
+      isexec: true
+  ragify:
+    cmd: uv run stages/ragify_parquet.py
+    deps:
+    - path: stages/ragify_parquet.py
+      hash: md5
+      md5: a91dd697c10e41145d11ffdebdb97f67
+      size: 2836
       isexec: true

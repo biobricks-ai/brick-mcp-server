@@ -24,9 +24,8 @@ stages:
     cmd: stages/03_resolve.sh
     deps:
       - stages/03_resolve.sh
-    outs:
-      - mcp
   ragify:
-    cmd: uv run stages/04_ragify.py
+    cmd: uv run stages/ragify_parquet.py
     deps:
-      - stages/04_ragify.py
+      - stages/ragify_parquet.py
+    
