@@ -20,7 +20,7 @@ process_brick() {
     # Recursively copy, resolving all symlinks
     for brick_subdir in "$brick_dir"/*/brick; do
         [ -d "$brick_subdir" ] || continue
-        cp -aL "$brick_subdir"/. "$dst"/
+        cp -aLul "$brick_subdir"/. "$dst"/
     done
 }
 
@@ -28,4 +28,4 @@ export -f process_brick
 export src_root
 export dst_root
 
-find "$src_root" -mindepth 1 -maxdepth 1 -type d | parallel --bar --will-cite process_brick {}
+find "$src_root" -mindepth 1 -maxdepth 1 -type d | parallel --bar -j0 --will-cite process_brick {}

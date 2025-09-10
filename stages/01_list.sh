@@ -16,7 +16,7 @@ repos=$(gh repo list "$OWNER" --visibility=public --limit "1000" --json name,own
 
 # For each repo, check if root-level dvc.lock exists using the contents API
 # shellcheck disable=SC2016
-echo "$repos" | parallel --will-cite --bar '
+echo "$repos" | parallel --will-cite -j0 --bar '
     repo="{}"
     if [ -n "$repo" ]; then
         if gh api -X GET -H "Accept: application/vnd.github.v3+json" "repos/$repo/contents/dvc.lock" >/dev/null 2>&1; then
