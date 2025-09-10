@@ -74,14 +74,26 @@ stages:
     deps:
     - path: stages/03_resolve.sh
       hash: md5
-      md5: 5e7f7ba0e70b1c64295442308d89beed
-      size: 757
+      md5: 3c7a8c84394f8a7f513caf8693df44b2
+      size: 835
       isexec: true
+    outs:
+    - path: docs
+      hash: md5
+      md5: 40ceaf52e520582ef8146b4017187835.dir
+      size: 229450
+      nfiles: 133
   ragify:
     cmd: uv run stages/ragify_parquet.py
     deps:
     - path: stages/ragify_parquet.py
       hash: md5
-      md5: a91dd697c10e41145d11ffdebdb97f67
-      size: 2836
+      md5: d3651ba959c38dd361cb60e27c5baa2d
+      size: 3914
       isexec: true
+    outs:
+    - path: metadata
+      hash: md5
+      md5: 55a42df62686575000e5c229b434956d.dir
+      size: 4728732
+      nfiles: 1207
